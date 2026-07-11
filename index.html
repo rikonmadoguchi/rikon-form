@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>りこんの窓口診断</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Hiragino Sans', sans-serif; background: #f0f4f8; color: #333; padding: 20px; }
+    .container { max-width: 480px; margin: 0 auto; background: white; border-radius: 16px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+    h1 { font-size: 20px; color: #4a6fa5; margin-bottom: 24px; text-align: center; }
+    .question-label { font-size: 15px; font-weight: bold; margin-bottom: 10px; line-height: 1.6; }
+    .required { color: #e74c3c; margin-left: 4px; }
+    .option { display: flex; align-items: center; padding: 10px 12px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; }
+    .option.selected { background: #e8f0fe; border-color: #4a6fa5; }
+    .option input[type="radio"], .option input[type="checkbox"] { margin-right: 10px; pointer-events: none; flex-shrink: 0; }
+    .option input[type="text"] { margin-left: 8px; border: none; border-bottom: 1px solid #aaa; outline: none; font-size: 14px; flex: 1; background: transparent; }
+    textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; min-height: 100px; }
+    .progress { background: #eee; border-radius: 99px; height: 6px; margin-bottom: 16px; }
+    .progress-bar { background: #4a6fa5; height: 6px; border-radius: 99px; }
+    .step-info { text-align: right; font-size: 12px; color: #888; margin-bottom: 8px; }
+    .btn { width: 100%; padding: 14px; background: #4a6fa5; color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; margin-top: 16px; }
+    .btn:disabled { background: #aaa; }
+    .error { color: #e74c3c; font-size: 13px; margin-top: 8px; }
+    .thank-you { text-align: center; padding: 40px 20px; }
+    .thank-you h2 { color: #4a6fa5; margin-bottom: 16px; }
+    .thank-you p { color: #666; line-height: 1.8; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>りこんの窓口</h1>
+  <div id="form-area">
+    <div class="step-info" id="step-info"></div>
+    <div class="progress">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <div id="question-area"></div>
+    <p class="error" id="error-msg"></p>
+    <button class="btn" id="next-btn" onclick="nextStep()">次へ</button>
+  </div>
+  <div id="thank-you-area" style="display:none">
+    <div class="thank-you">
+      <div style="font-size:48px;margin-bottom:16px">✅</div>
+      <h2>ご回答ありがとうございました</h2>
+      <p>内容を確認の上、<br>あなたに合った情報を<br>改めてご連絡いたします。<br><br>まずは一人で抱え込まず、<br>ここに来てくださったこと、<br>それだけで十分です。</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwKpAVaiEZoknEuk8hVhHfbuqYkw0gJ3W7TYGxJz6kldMTfBm8ZQFa9NMJ6x9k8zFaE/exec";
+
+const questions = [
+  { id:"q1", type:"radio", required:true, label:"1. 今のお気持ちに一番近いものを教えてください", options:["なんとなくモヤモヤしている","誰かに話を聞いてほしい","何から始めたらいいか分からない","情報を集めたい","今すぐ解決したいことがある","その他"] },
+  { id:"q2", type:"radio", required:true, label:"2. 今の状況に一番近いものを教えてください", options:["パートナーと一緒に暮らしている","最近すれ違いが増えた","ケンカが増えている","別居している","離婚について話し合っている","調停・裁判が進んでいる","離婚後の生活について悩んでいる","その他"] },
+  { id:"q3", type:"checkbox", required:true, label:"3. 今、気になっていることを教えてください（複数選択可）", options:["夫婦関係","子ども","お金","住まい","仕事・働き方","心やストレス","法律・手続き","親族との関係","家事・育児","DV・モラハラ","将来への不安","その他"] },
+  { id:"q4", type:"radio", required:true, label:"4. その中でも、一番相談したいことを教えてください", options:["夫婦関係","子ども","お金","住まい","仕事・働き方","心やストレス","法律・手続き","親族との関係","家事・育児","DV・モラハラ","将来への不安","その他"] },
+  { id:"q5", type:"radio", required:true, label:"5. 今のお気持ちに一番近いものを教えてください", options:["このままで良いのか迷っている","関係を改善したい","一度距離を置きたい","離婚も選択肢として考えている","離婚することを決めている","まだ自分でも分からない","その他"] },
+  { id:"q6", type:"radio", required:true, label:"6. どのくらい急いでいますか？", options:["今日中","今週中","今月中","急ぎではない","まず情報収集したい","その他"] },
+  { id:"q7", type:"radio", required:true, label:"7. お子さまについて教えてください", options:["子どもはいない","妊娠中","0〜2歳","未就学児","小学生","中学生","高校生以上","その他"] },
+  { id:"q8", type:"radio", required:true, label:"8. 今、相談できる方はいますか？", options:["家族","友人","職場","専門家","誰にも相談できていない","その他"] },
+  { id:"q9", type:"checkbox", required:true, label:"9. これまで専門家へ相談したことはありますか？（複数選択可）", options:["相談したことはない","弁護士","行政・自治体","カウンセラー","ファイナンシャルプランナー","民間相談窓口","その他"] },
+  { id:"q10", type:"radio", required:true, label:"10. 今後、一番実現したいことを教えてください", options:["気持ちを整理したい","関係を改善したい","安心して生活したい","子どもを守りたい","お金の不安を減らしたい","新しい人生をスタートしたい","その他"] },
+  { id:"q11", type:"textarea", required:false, label:"11. 今の状況やお気持ちで伝えておきたいことがあれば、ご自由にご記入ください" }
+];
+
+let currentStep = 0;
+let answers = {};
+let otherTexts = {};
+
+// URLからユーザーIDを取得
+const urlParams = new URLSearchParams(window.location.search);
+const userId = urlParams.get('uid') || "anonymous";
+
+function renderQuestion() {
+  const q = questions[currentStep];
+  const total = questions.length;
+  document.getElementById("step-info").textContent = `質問 ${currentStep + 1} / ${total}`;
+  document.getElementById("progress-bar").style.width = `${((currentStep + 1) / total) * 100}%`;
+  document.getElementById("error-msg").textContent = "";
+
+  let html = `<div class="question-label">${q.label}${q.required ? '<span class="required">*</span>' : ''}</div>`;
+
+  if (q.type === "radio") {
+    q.options.forEach(opt => {
+      if (opt === "その他") {
+        html += `<div class="option" onclick="selectOption(this, '${q.id}', 'その他')">
+          <input type="radio" name="${q.id}"> その他：
+          <input type="text" id="other_${q.id}" placeholder="自由記入" onclick="event.stopPropagation()" oninput="otherTexts['${q.id}']=this.value">
+        </div>`;
+      } else {
+        html += `<div class="option" onclick="selectOption(this, '${q.id}', '${opt}')">
+          <input type="radio" name="${q.id}"> ${opt}
+        </div>`;
+      }
+    });
+  } else if (q.type === "checkbox") {
+    q.options.forEach(opt => {
+      if (opt === "その他") {
+        html += `<div class="option" onclick="toggleOption(this, '${q.id}', 'その他')">
+          <input type="checkbox"> その他：
+          <input type="text" id="other_${q.id}" placeholder="自由記入" onclick="event.stopPropagation()" oninput="otherTexts['${q.id}']=this.value">
+        </div>`;
+      } else {
+        html += `<div class="option" onclick="toggleOption(this, '${q.id}', '${opt}')">
+          <input type="checkbox"> ${opt}
+        </div>`;
+      }
+    });
+  } else {
+    html += `<textarea id="textarea-input" placeholder="自由にご記入ください"></textarea>`;
+  }
+
+  document.getElementById("question-area").innerHTML = html;
+  document.getElementById("next-btn").textContent = currentStep === questions.length - 1 ? "送信する" : "次へ";
+}
+
+function selectOption(el, qId, value) {
+  answers[qId] = value;
+  document.querySelectorAll("#question-area .option").forEach(d => {
+    d.classList.remove("selected");
+    d.querySelector("input[type='radio']").checked = false;
+  });
+  el.classList.add("selected");
+  el.querySelector("input[type='radio']").checked = true;
+}
+
+function toggleOption(el, qId, value) {
+  if (!answers[qId]) answers[qId] = [];
+  const idx = answers[qId].indexOf(value);
+  if (idx === -1) {
+    answers[qId].push(value);
+    el.classList.add("selected");
+    el.querySelector("input[type='checkbox']").checked = true;
+  } else {
+    answers[qId].splice(idx, 1);
+    el.classList.remove("selected");
+    el.querySelector("input[type='checkbox']").checked = false;
+  }
+}
+
+function nextStep() {
+  const q = questions[currentStep];
+  if (q.type === "textarea") {
+    const ta = document.getElementById("textarea-input");
+    answers[q.id] = ta ? ta.value : "";
+  }
+  if (answers[q.id] === "その他" && otherTexts[q.id]) {
+    answers[q.id] = `その他：${otherTexts[q.id]}`;
+  }
+  if (Array.isArray(answers[q.id])) {
+    answers[q.id] = answers[q.id].map(a => a === "その他" && otherTexts[q.id] ? `その他：${otherTexts[q.id]}` : a);
+  }
+  if (q.required && (!answers[q.id] || (Array.isArray(answers[q.id]) && answers[q.id].length === 0))) {
+    document.getElementById("error-msg").textContent = "※ 回答を選択してください";
+    return;
+  }
+  if (currentStep < questions.length - 1) {
+    currentStep++;
+    renderQuestion();
+  } else {
+    submitForm();
+  }
+}
+
+async function submitForm() {
+  document.getElementById("next-btn").disabled = true;
+  document.getElementById("next-btn").textContent = "送信中...";
+  try {
+    await fetch(GAS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, answers })
+    });
+  } catch(err) {
+    console.error("送信エラー:", err);
+  }
+  document.getElementById("form-area").style.display = "none";
+  document.getElementById("thank-you-area").style.display = "block";
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
