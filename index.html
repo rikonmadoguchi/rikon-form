@@ -24,6 +24,7 @@
     .step-info { text-align: right; font-size: 12px; color: #888; margin-bottom: 8px; }
     .btn { width: 100%; padding: 14px; background: #945e8e; color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; margin-top: 16px; }
     .btn:disabled { background: #aaa; }
+    .btn-back { width: 100%; padding: 10px; background: white; color: #4a6fa5; border: 1px solid #4a6fa5; border-radius: 10px; font-size: 14px; cursor: pointer; margin-top: 8px; }
     .error { color: #e74c3c; font-size: 13px; margin-top: 8px; }
     .thank-you { text-align: center; padding: 40px 20px; }
     .thank-you h2 { color: #945e8e; margin-bottom: 16px; }
@@ -44,7 +45,9 @@
     </div>
     <div id="question-area"></div>
     <p class="error" id="error-msg"></p>
-    <button class="btn" id="next-btn" onclick="nextStep()">次へ</button>
+<button class="btn" id="next-btn" onclick="nextStep()">次へ</button>
+<button class="btn-back" id="back-btn" onclick="prevStep()" style="display:none;">← 戻る</button>
+<p style="text-align:center;font-size:12px;color:#aaa;margin-top:8px;">※ブラウザの戻るボタンは使わず、上の「戻る」ボタンをご利用ください</p>
   </div>
   <div id="thank-you-area" style="display:none">
     <div class="thank-you">
@@ -86,6 +89,7 @@ function renderQuestion() {
   document.getElementById("step-info").textContent = `質問 ${currentStep + 1} / ${total}`;
   document.getElementById("progress-bar").style.width = `${((currentStep + 1) / total) * 100}%`;
   document.getElementById("error-msg").textContent = "";
+  document.getElementById("back-btn").style.display = currentStep === 0 ? "none" : "block";
 
   let html = `<div class="question-label">${q.label}${q.required ? '<span class="required">*</span>' : ''}</div>`;
 
@@ -147,6 +151,13 @@ function toggleOption(el, qId, value) {
   }
 }
 
+function prevStep() {
+  if (currentStep > 0) {
+    currentStep--;
+    renderQuestion();
+  }
+}
+  
 function nextStep() {
   const q = questions[currentStep];
   if (q.type === "textarea") {
