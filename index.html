@@ -93,29 +93,33 @@ function renderQuestion() {
 
   let html = `<div class="question-label">${q.label}${q.required ? '<span class="required">*</span>' : ''}</div>`;
 
-  if (q.type === "radio") {
+ if (q.type === "radio") {
     q.options.forEach(opt => {
+      const isSelected = answers[q.id] === opt || answers[q.id] === `その他：${otherTexts[q.id]}` && opt === "その他";
       if (opt === "その他") {
-        html += `<div class="option" onclick="selectOption(this, '${q.id}', 'その他')">
-          <input type="radio" name="${q.id}"> その他：
-          <input type="text" id="other_${q.id}" placeholder="自由記入" onclick="event.stopPropagation()" oninput="otherTexts['${q.id}']=this.value">
+        html += `<div class="option ${isSelected ? 'selected' : ''}" onclick="selectOption(this, '${q.id}', 'その他')">
+          <input type="radio" name="${q.id}" ${isSelected ? 'checked' : ''}> その他：
+          <input type="text" id="other_${q.id}" placeholder="自由記入" onclick="event.stopPropagation()" oninput="otherTexts['${q.id}']=this.value" value="${otherTexts[q.id] || ''}">
         </div>`;
       } else {
-        html += `<div class="option" onclick="selectOption(this, '${q.id}', '${opt}')">
-          <input type="radio" name="${q.id}"> ${opt}
+        html += `<div class="option ${isSelected ? 'selected' : ''}" onclick="selectOption(this, '${q.id}', '${opt}')">
+          <input type="radio" name="${q.id}" ${isSelected ? 'checked' : ''}> ${opt}
         </div>`;
       }
     });
-  } else if (q.type === "checkbox") {
+   
+ } else if (q.type === "checkbox") {
+    const selected = answers[q.id] || [];
     q.options.forEach(opt => {
+      const isSelected = selected.includes(opt) || selected.some(a => a.startsWith('その他：') && opt === "その他");
       if (opt === "その他") {
-        html += `<div class="option" onclick="toggleOption(this, '${q.id}', 'その他')">
-          <input type="checkbox"> その他：
-          <input type="text" id="other_${q.id}" placeholder="自由記入" onclick="event.stopPropagation()" oninput="otherTexts['${q.id}']=this.value">
+        html += `<div class="option ${isSelected ? 'selected' : ''}" onclick="toggleOption(this, '${q.id}', 'その他')">
+          <input type="checkbox" ${isSelected ? 'checked' : ''}> その他：
+          <input type="text" id="other_${q.id}" placeholder="自由記入" onclick="event.stopPropagation()" oninput="otherTexts['${q.id}']=this.value" value="${otherTexts[q.id] || ''}">
         </div>`;
       } else {
-        html += `<div class="option" onclick="toggleOption(this, '${q.id}', '${opt}')">
-          <input type="checkbox"> ${opt}
+        html += `<div class="option ${isSelected ? 'selected' : ''}" onclick="toggleOption(this, '${q.id}', '${opt}')">
+          <input type="checkbox" ${isSelected ? 'checked' : ''}> ${opt}
         </div>`;
       }
     });
