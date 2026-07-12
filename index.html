@@ -33,6 +33,10 @@
 <body>
 <div class="container">
   <h1>りこんの窓口</h1>
+  <div id="loading-area" style="text-align:center;padding:40px 20px;display:none;">
+  <p style="color:#888;margin-bottom:16px;">読み込めませんでした</p>
+  <button class="btn" onclick="location.reload()">再読み込みする</button>
+</div>
   <div id="form-area">
     <div class="step-info" id="step-info"></div>
     <div class="progress">
@@ -184,7 +188,12 @@ async function submitForm() {
   document.getElementById("thank-you-area").style.display = "block";
 }
 
-renderQuestion();
+try {
+  renderQuestion();
+} catch(err) {
+  document.getElementById("form-area").style.display = "none";
+  document.getElementById("loading-area").style.display = "block";
+}
 </script>
 </body>
 </html>
