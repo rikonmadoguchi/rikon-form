@@ -1,215 +1,472 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>りこんの窓口診断</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Hiragino Sans', sans-serif; background: #f0f4f8; color: #333; padding: 20px; }
-    .container { max-width: 480px; margin: 0 auto; background: white; border-radius: 16px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
-    h1 { font-size: 20px; color: #945e8e; margin-bottom: 24px; text-align: center; }
-    .question-label { font-size: 15px; font-weight: bold; margin-bottom: 10px; line-height: 1.6; }
-    .required { color: #e74c3c; margin-left: 4px; }
-    .option { display: flex; align-items: center; padding: 10px 12px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; }
-    .option.selected { background: #e8f0fe; border-color: #945e8e; }
-    .option input[type="radio"], .option input[type="checkbox"] { margin-right: 10px; pointer-events: none; flex-shrink: 0; }
-    .option input[type="text"] { margin-left: 8px; border: none; border-bottom: 1px solid #aaa; outline: none; font-size: 14px; flex: 1; background: transparent; }
-    textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; min-height: 100px; }
-    .progress { background: #eee; border-radius: 99px; height: 6px; margin-bottom: 16px; }
-    .progress-bar { background: #945e8e; height: 6px; border-radius: 99px; }
-    .step-info { text-align: right; font-size: 12px; color: #888; margin-bottom: 8px; }
-    .btn { width: 100%; padding: 14px; background: #945e8e; color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; margin-top: 16px; }
-    .btn:disabled { background: #aaa; }
-    .btn-back { width: 100%; padding: 10px; background: white; color: #4a6fa5; border: 1px solid #4a6fa5; border-radius: 10px; font-size: 14px; cursor: pointer; margin-top: 8px; }
-    .error { color: #e74c3c; font-size: 13px; margin-top: 8px; }
-    .thank-you { text-align: center; padding: 40px 20px; }
-    .thank-you h2 { color: #945e8e; margin-bottom: 16px; }
-    .thank-you p { color: #666; line-height: 1.8; }
-  </style>
+<meta name="robots" content="noindex">
+<title>りこんの窓口診断</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FBF8F3;
+  --ink:#1F2A3C;
+  --muted:#6B7280;
+  --line:#E8E2D8;
+  --orange:#E8A33D;
+  --teal:#2F7A92;
+  --tint:#EEF5F7;
+  --grad:linear-gradient(135deg,#E8A33D 0%,#2F7A92 100%);
+  --shadow:0 8px 24px rgba(31,42,60,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%}
+body{
+  font-family:'Noto Sans JP','Hiragino Sans','Yu Gothic',sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  line-height:1.7;
+  -webkit-text-size-adjust:100%;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(420px 320px at 100% 0%,rgba(232,163,61,.16),transparent 70%),
+    radial-gradient(420px 360px at 0% 100%,rgba(47,122,146,.12),transparent 70%);
+}
+.app{
+  position:relative;max-width:480px;margin:0 auto;
+  min-height:100vh;min-height:100dvh;
+  display:flex;flex-direction:column;
+}
+.screen{display:none;flex:1;flex-direction:column}
+.screen.active{display:flex}
+
+/* ---------- 共通パーツ ---------- */
+.logo-img{display:block;object-fit:contain}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 14px;border-radius:999px;
+  background:#fff;border:1px solid var(--line);
+  font-size:12px;font-weight:500;color:var(--teal);
+}
+.btn-main{
+  display:block;width:100%;border:none;cursor:pointer;
+  padding:16px 20px;border-radius:999px;
+  background:var(--grad);color:#fff;
+  font-family:inherit;font-size:16px;font-weight:700;letter-spacing:.04em;
+  box-shadow:0 10px 24px rgba(47,122,146,.28);
+  transition:transform .15s ease,opacity .15s ease;
+}
+.btn-main:active{transform:scale(.98)}
+.btn-main:disabled{opacity:.55;box-shadow:none}
+.btn-ghost{
+  border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;
+  padding:16px 20px;border-radius:999px;
+  font-family:inherit;font-size:15px;font-weight:500;
+}
+.btn-ghost:active{background:var(--tint)}
+
+/* ---------- 開始画面 ---------- */
+#screen-start{justify-content:center;align-items:center;text-align:center;padding:40px 28px;animation:fadeUp .6s ease both}
+#screen-start .logo-img{width:84px;height:84px;margin:0 auto 18px}
+#screen-start .brand{font-size:26px;font-weight:700;letter-spacing:.12em}
+#screen-start .sub{font-size:13px;color:var(--teal);margin-top:2px}
+#screen-start h1{font-size:19px;font-weight:700;line-height:1.7;margin:32px 0 10px}
+#screen-start .lead{font-size:14px;color:var(--muted);line-height:1.9}
+.chips{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:26px 0 34px}
+#screen-start .btn-main{max-width:320px;margin:0 auto}
+.start-note{margin-top:18px;font-size:12px;color:var(--muted)}
+
+/* ---------- 質問画面 ---------- */
+.q-head{padding:18px 22px 0}
+.q-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.q-top .logo-img{width:30px;height:30px}
+.q-count{font-size:13px;font-weight:500;color:var(--muted);letter-spacing:.06em}
+.q-count b{color:var(--ink);font-size:15px}
+.progress{height:6px;border-radius:99px;background:#EAE4D9;overflow:hidden}
+.progress-bar{height:100%;width:0;border-radius:99px;background:var(--grad);transition:width .35s ease}
+.q-body{flex:1;padding:26px 22px 8px}
+.q-wrap.from-right{animation:inR .32s ease both}
+.q-wrap.from-left{animation:inL .32s ease both}
+.q-tag{
+  display:inline-block;margin-bottom:12px;
+  font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--orange);
+}
+.q-title{font-size:19px;font-weight:700;line-height:1.7}
+.q-hint{font-size:12.5px;color:var(--muted);margin:6px 0 18px}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{
+  display:flex;align-items:center;gap:14px;
+  padding:15px 16px;border-radius:18px;
+  background:#fff;border:1.5px solid var(--line);
+  box-shadow:0 2px 8px rgba(31,42,60,.04);
+  cursor:pointer;font-size:15px;line-height:1.5;
+  transition:border-color .15s ease,background .15s ease,transform .1s ease,box-shadow .15s ease;
+}
+.opt:active{transform:scale(.985)}
+.opt.sel{border-color:var(--teal);background:var(--tint);box-shadow:0 6px 16px rgba(47,122,146,.14)}
+.ind{
+  flex:0 0 auto;width:22px;height:22px;border-radius:50%;
+  border:2px solid #CFC8BC;background:#fff;position:relative;
+  transition:all .15s ease;
+}
+.ind.sq{border-radius:7px}
+.opt.sel .ind{border-color:transparent;background:var(--grad)}
+.opt.sel .ind::after{
+  content:"";position:absolute;left:6px;top:2px;width:6px;height:11px;
+  border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg);
+}
+.opt-text{flex:1;min-width:0}
+.opt input[type="text"]{
+  flex:1;min-width:0;border:none;border-bottom:1.5px solid #CFC8BC;background:transparent;
+  outline:none;font-family:inherit;font-size:16px;color:var(--ink);padding:4px 2px;
+}
+.opt input[type="text"]:focus{border-bottom-color:var(--teal)}
+.other-label{white-space:nowrap}
+textarea{
+  width:100%;min-height:170px;padding:16px;border-radius:18px;
+  border:1.5px solid var(--line);background:#fff;resize:vertical;
+  font-family:inherit;font-size:16px;line-height:1.7;color:var(--ink);outline:none;
+  box-shadow:0 2px 8px rgba(31,42,60,.04);
+}
+textarea:focus{border-color:var(--teal)}
+.err{min-height:22px;margin-top:12px;font-size:13px;color:#C0392B}
+
+.bar{
+  position:sticky;bottom:0;
+  padding:14px 22px calc(14px + env(safe-area-inset-bottom));
+  background:linear-gradient(to top,var(--bg) 72%,rgba(251,248,243,0));
+}
+.bar-row{display:flex;gap:10px}
+.bar-row .btn-main{flex:1}
+.bar-note{margin-top:10px;text-align:center;font-size:11px;color:#9CA3AF}
+
+/* ---------- 完了画面 ---------- */
+#screen-done{justify-content:center;align-items:center;text-align:center;padding:40px 28px;animation:fadeUp .6s ease both}
+.done-icon{
+  width:84px;height:84px;border-radius:50%;background:var(--grad);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 26px;
+  box-shadow:0 12px 28px rgba(47,122,146,.28);
+}
+.done-icon svg{width:42px;height:42px}
+#screen-done h2{font-size:21px;font-weight:700;line-height:1.6;margin-bottom:14px}
+#screen-done p{font-size:14px;color:var(--muted);line-height:1.95}
+.done-card{
+  margin-top:28px;padding:18px 20px;border-radius:20px;background:#fff;
+  border:1px solid var(--line);box-shadow:var(--shadow);
+  font-size:14px;line-height:1.9;color:var(--ink);
+}
+.done-card b{color:var(--teal)}
+
+/* ---------- 読み込み失敗 ---------- */
+#fallback{display:none;text-align:center;padding:80px 28px}
+#fallback p{color:var(--muted);margin-bottom:18px}
+
+@keyframes inR{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
+@keyframes inL{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
 </head>
 <body>
-<div class="container">
-  <h1>りこんの窓口</h1>
-  <div id="loading-area" style="text-align:center;padding:40px 20px;display:none;">
-  <p style="color:#888;margin-bottom:16px;">読み込めませんでした</p>
-  <button class="btn" onclick="location.reload()">再読み込みする</button>
-</div>
-  <div id="form-area">
-    <div class="step-info" id="step-info"></div>
-    <div class="progress">
-      <div class="progress-bar" id="progress-bar"></div>
+<div class="app">
+
+  <!-- 開始画面 -->
+  <section class="screen active" id="screen-start">
+    <img class="logo-img" src="logo.png" alt="" onerror="this.style.display='none'">
+    <div class="brand">りこんの窓口</div>
+    <div class="sub">あなたの未来に、より良い選択を。</div>
+    <h1>答えを出す場所ではなく、<br>選択肢を見つける場所です。</h1>
+    <p class="lead">いくつかの質問に答えながら、<br>今の状況をいっしょに整理してみませんか。</p>
+    <div class="chips">
+      <span class="chip">匿名OK</span>
+      <span class="chip">約3分</span>
+      <span class="chip">無料</span>
     </div>
-    <div id="question-area"></div>
-    <p class="error" id="error-msg"></p>
-<button class="btn" id="next-btn" onclick="nextStep()">次へ</button>
-<button class="btn-back" id="back-btn" onclick="prevStep()" style="display:none;">← 戻る</button>
-<p style="text-align:center;font-size:12px;color:#aaa;margin-top:8px;">※ブラウザの戻るボタンは使わず、上の「戻る」ボタンをご利用ください</p>
-  </div>
-  <div id="thank-you-area" style="display:none">
-    <div class="thank-you">
-      <div style="font-size:48px;margin-bottom:16px">✅</div>
-      <h2>ご回答ありがとうございました</h2>
-      <p>公式LINEに戻り、<br>メッセージをご確認ください。<br><br>まずは一人で抱え込まず、<br>ここに来てくださったこと、<br>それだけで十分です。</p>
+    <button class="btn-main" id="start-btn" type="button">はじめる</button>
+    <p class="start-note">答えたくない質問は、無理のない範囲で大丈夫です。</p>
+  </section>
+
+  <!-- 質問画面 -->
+  <section class="screen" id="screen-q">
+    <div class="q-head">
+      <div class="q-top">
+        <img class="logo-img" src="logo.png" alt="" onerror="this.style.display='none'">
+        <div class="q-count" id="q-count"></div>
+      </div>
+      <div class="progress"><div class="progress-bar" id="progress-bar"></div></div>
     </div>
+    <div class="q-body">
+      <div id="q-area"></div>
+      <p class="err" id="err"></p>
+    </div>
+    <div class="bar">
+      <div class="bar-row">
+        <button class="btn-ghost" id="back-btn" type="button">戻る</button>
+        <button class="btn-main" id="next-btn" type="button">次へ</button>
+      </div>
+      <p class="bar-note">ブラウザの戻るボタンは使わず、画面下の「戻る」をご利用ください</p>
+    </div>
+  </section>
+
+  <!-- 完了画面 -->
+  <section class="screen" id="screen-done">
+    <div class="done-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+    </div>
+    <h2>ご回答ありがとうございました</h2>
+    <p>内容を確認の上、<br>あなたに合った情報を<br>改めてご連絡いたします。</p>
+    <div class="done-card">
+      最後に、このアカウントに<br><b>「回答しました」</b>と<br>一言メッセージを送ってください。
+    </div>
+  </section>
+
+  <div id="fallback">
+    <p>読み込めませんでした。<br>通信環境をご確認のうえ、再読み込みをお試しください。</p>
+    <button class="btn-main" type="button" onclick="location.reload()" style="max-width:260px;margin:0 auto">再読み込みする</button>
   </div>
 </div>
 
 <script>
 const GAS_URL = "https://script.google.com/macros/s/AKfycbwKpAVaiEZoknEuk8hVhHfbuqYkw0gJ3W7TYGxJz6kldMTfBm8ZQFa9NMJ6x9k8zFaE/exec";
 
-const questions = [
-  { id:"q0", type:"radio", required:true, label:"このフォームは誰が入力していますか？", options:["本人が入力している","家族・親族が代わりに入力している","友人・知人が代わりに入力している","その他"] },
-  { id:"q1", type:"radio", required:true, label:"2. 今のお気持ちに一番近いものを教えてください", options:["なんとなくモヤモヤしている","誰かに話を聞いてほしい","何から始めたらいいか分からない","情報を集めたい","今すぐ解決したいことがある","その他"] },
-  { id:"q2", type:"radio", required:true, label:"3. 今の状況に一番近いものを教えてください", options:["パートナーと一緒に暮らしている","最近すれ違いが増えた","ケンカが増えている","別居している","離婚について話し合っている","調停・裁判が進んでいる","離婚後の生活について悩んでいる","その他"] },
-  { id:"q3", type:"checkbox", required:true, label:"4. 今、気になっていることを教えてください（複数選択可）", options:["夫婦関係","子ども","お金","住まい","仕事・働き方","心やストレス","法律・手続き","親族との関係","家事・育児","DV・モラハラ","将来への不安","その他"] },
-  { id:"q4", type:"radio", required:true, label:"5. その中でも、一番相談したいことを教えてください", options:["夫婦関係","子ども","お金","住まい","仕事・働き方","心やストレス","法律・手続き","親族との関係","家事・育児","DV・モラハラ","将来への不安","その他"] },
-  { id:"q5", type:"radio", required:true, label:"6. 今のお気持ちに一番近いものを教えてください", options:["このままで良いのか迷っている","関係を改善したい","一度距離を置きたい","離婚も選択肢として考えている","離婚することを決めている","まだ自分でも分からない","その他"] },
-  { id:"q6", type:"radio", required:true, label:"7. ライフナビゲーター(総合相談員)とのオンライン面談についてのご希望", options:["可能な限り急ぎでまず連絡を取りたい","近日中に、解決を目指せるプロと話したい","近日中に、何から始めるべきか相談したい","まずは話をゆっくり聞いて欲しい","今は必要ない"] },
-  { id:"q7", type:"radio", required:true, label:"8. お子さまについて教えてください", options:["子どもはいない","妊娠中","0〜2歳","未就学児","小学生","中学生","高校生以上","その他"] },
-  { id:"q8", type:"radio", required:true, label:"9. 今、相談できる方はいますか？", options:["家族","友人","職場","専門家","誰にも相談できていない","その他"] },
-  { id:"q9", type:"checkbox", required:true, label:"10. これまで専門家へ相談したことはありますか？（複数選択可）", options:["相談したことはない","弁護士","行政・自治体","カウンセラー","ファイナンシャルプランナー","民間相談窓口","その他"] },
-  { id:"q10", type:"radio", required:true, label:"11. 今後、一番実現したいことを教えてください", options:["気持ちを整理したい","関係を改善したい","安心して生活したい","子どもを守りたい","お金の不安を減らしたい","新しい人生をスタートしたい","その他"] },
-  { id:"q11", type:"textarea", required:false, label:"12. 今の状況やお気持ちで伝えておきたいことがあれば、ご自由にご記入ください" },
-  { id:"q12", type:"radio", required:true, label:"13. りこんの窓口をどこでお知りになりましたか？", options:["Threads（スレッズ）","検索エンジン（Google・Yahoo!など）","ホームページ","メディア・記事・特集","知人","その他"] }
+const SELF_Q = ["本人が入力している","家族・親族が代わりに入力している","友人・知人が代わりに入力している","その他"];
+const CONCERNS = ["夫婦関係","子ども","お金","住まい","仕事・働き方","心やストレス","法律・手続き","親族との関係","家事・育児","DV・モラハラ","将来への不安","その他"];
+
+const QUESTIONS = [
+  { id:"q0", type:"radio", required:true, label:"このフォームは誰が入力していますか？", options:SELF_Q },
+  { id:"q1", type:"radio", required:true, label:"今のお気持ちに一番近いものを教えてください", options:["なんとなくモヤモヤしている","誰かに話を聞いてほしい","何から始めたらいいか分からない","情報を集めたい","今すぐ解決したいことがある","その他"] },
+  { id:"q2", type:"radio", required:true, label:"今の状況に一番近いものを教えてください", options:["パートナーと一緒に暮らしている","最近すれ違いが増えた","ケンカが増えている","別居している","離婚について話し合っている","調停・裁判が進んでいる","離婚後の生活について悩んでいる","その他"] },
+  { id:"q3", type:"checkbox", required:true, label:"今、気になっていることを教えてください", options:CONCERNS },
+  { id:"q4", type:"radio", required:true, label:"その中でも、一番相談したいことを教えてください", options:CONCERNS },
+  { id:"q5", type:"radio", required:true, label:"今のお気持ちに一番近いものを教えてください", options:["このままで良いのか迷っている","関係を改善したい","一度距離を置きたい","離婚も選択肢として考えている","離婚することを決めている","まだ自分でも分からない","その他"] },
+  { id:"q6", type:"radio", required:true, label:"ライフナビゲーター(総合相談員)とのオンライン面談についてのご希望", options:["可能な限り急ぎでまず連絡を取りたい","近日中に、解決を目指せるプロと話したい","近日中に、何から始めるべきか相談したい","まずは話をゆっくり聞いて欲しい","今は必要ない"] },
+  { id:"q7", type:"radio", required:true, label:"お子さまについて教えてください", options:["子どもはいない","妊娠中","0〜2歳","未就学児","小学生","中学生","高校生以上","その他"] },
+  { id:"q8", type:"radio", required:true, label:"今、相談できる方はいますか？", options:["家族","友人","職場","専門家","誰にも相談できていない","その他"] },
+  { id:"q9", type:"checkbox", required:true, label:"これまで専門家へ相談したことはありますか？", options:["相談したことはない","弁護士","行政・自治体","カウンセラー","ファイナンシャルプランナー","民間相談窓口","その他"] },
+  { id:"q10", type:"radio", required:true, label:"今後、一番実現したいことを教えてください", options:["気持ちを整理したい","関係を改善したい","安心して生活したい","子どもを守りたい","お金の不安を減らしたい","新しい人生をスタートしたい","その他"] },
+  { id:"q11", type:"text", required:false, label:"今の状況やお気持ちで、伝えておきたいことがあればご自由にご記入ください" },
+  { id:"q12", type:"radio", required:true, label:"りこんの窓口をどこでお知りになりましたか？", options:["Instagram","X（旧Twitter）","Threads（スレッズ）","検索エンジン（Google・Yahoo!など）","ホームページ","メディア・記事・特集","知人","その他"] }
 ];
 
-let currentStep = 0;
-let answers = {};
-let otherTexts = {};
+const OTHER = "その他";
+const params = new URLSearchParams(window.location.search);
+const userId = params.get("uid") || "anonymous";
 
-// URLからユーザーIDを取得
-const urlParams = new URLSearchParams(window.location.search);
-const userId = urlParams.get('uid') || "anonymous";
+const state = { idx:0, sel:{}, other:{}, busy:false };
+let advanceTimer = null;
 
-function renderQuestion() {
-  const q = questions[currentStep];
-  const total = questions.length;
-  document.getElementById("step-info").textContent = `質問 ${currentStep + 1} / ${total}`;
-  document.getElementById("progress-bar").style.width = `${((currentStep + 1) / total) * 100}%`;
-  document.getElementById("error-msg").textContent = "";
-  document.getElementById("back-btn").style.display = currentStep === 0 ? "none" : "block";
+const $ = (id) => document.getElementById(id);
 
-  let html = `<div class="question-label">${q.label}${q.required ? '<span class="required">*</span>' : ''}</div>`;
-
- if (q.type === "radio") {
-    q.options.forEach(opt => {
-      const isSelected = answers[q.id] === opt || answers[q.id] === `その他：${otherTexts[q.id]}` && opt === "その他";
-      if (opt === "その他") {
-        html += `<div class="option ${isSelected ? 'selected' : ''}" onclick="selectOption(this, '${q.id}', 'その他')">
-          <input type="radio" name="${q.id}" ${isSelected ? 'checked' : ''}> その他：
-          <input type="text" id="other_${q.id}" placeholder="自由記入" onclick="event.stopPropagation()" oninput="otherTexts['${q.id}']=this.value" value="${otherTexts[q.id] || ''}">
-        </div>`;
-      } else {
-        html += `<div class="option ${isSelected ? 'selected' : ''}" onclick="selectOption(this, '${q.id}', '${opt}')">
-          <input type="radio" name="${q.id}" ${isSelected ? 'checked' : ''}> ${opt}
-        </div>`;
-      }
-    });
-   
- } else if (q.type === "checkbox") {
-    const selected = answers[q.id] || [];
-    q.options.forEach(opt => {
-      const isSelected = selected.includes(opt) || selected.some(a => a.startsWith('その他：') && opt === "その他");
-      if (opt === "その他") {
-        html += `<div class="option ${isSelected ? 'selected' : ''}" onclick="toggleOption(this, '${q.id}', 'その他')">
-          <input type="checkbox" ${isSelected ? 'checked' : ''}> その他：
-          <input type="text" id="other_${q.id}" placeholder="自由記入" onclick="event.stopPropagation()" oninput="otherTexts['${q.id}']=this.value" value="${otherTexts[q.id] || ''}">
-        </div>`;
-      } else {
-        html += `<div class="option ${isSelected ? 'selected' : ''}" onclick="toggleOption(this, '${q.id}', '${opt}')">
-          <input type="checkbox" ${isSelected ? 'checked' : ''}> ${opt}
-        </div>`;
-      }
-    });
-  } else {
-    html += `<textarea id="textarea-input" placeholder="自由にご記入ください"></textarea>`;
-  }
-
-  document.getElementById("question-area").innerHTML = html;
-  document.getElementById("next-btn").textContent = currentStep === questions.length - 1 ? "送信する" : "次へ";
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  $(id).classList.add("active");
+  window.scrollTo(0,0);
 }
 
-function selectOption(el, qId, value) {
-  answers[qId] = value;
-  document.querySelectorAll("#question-area .option").forEach(d => {
-    d.classList.remove("selected");
-    d.querySelector("input[type='radio']").checked = false;
+function isSelected(q, opt){
+  const v = state.sel[q.id];
+  return q.type === "checkbox" ? (Array.isArray(v) && v.indexOf(opt) !== -1) : v === opt;
+}
+
+function refreshOptions(){
+  document.querySelectorAll("#q-area .opt").forEach(el => {
+    const q = QUESTIONS[state.idx];
+    el.classList.toggle("sel", isSelected(q, el.dataset.opt));
   });
-  el.classList.add("selected");
-  el.querySelector("input[type='radio']").checked = true;
 }
 
-function toggleOption(el, qId, value) {
-  if (!answers[qId]) answers[qId] = [];
-  const idx = answers[qId].indexOf(value);
-  if (idx === -1) {
-    answers[qId].push(value);
-    el.classList.add("selected");
-    el.querySelector("input[type='checkbox']").checked = true;
+function renderQuestion(dir){
+  const q = QUESTIONS[state.idx];
+  const total = QUESTIONS.length;
+  $("q-count").innerHTML = "<b>" + (state.idx + 1) + "</b> / " + total;
+  $("progress-bar").style.width = ((state.idx + 1) / total * 100) + "%";
+  $("err").textContent = "";
+  $("next-btn").textContent = state.idx === total - 1 ? "送信する" : "次へ";
+  $("next-btn").disabled = false;
+
+  const wrap = document.createElement("div");
+  wrap.className = "q-wrap " + (dir === "back" ? "from-left" : "from-right");
+
+  const tag = document.createElement("div");
+  tag.className = "q-tag";
+  tag.textContent = "QUESTION " + String(state.idx + 1).padStart(2, "0");
+  wrap.appendChild(tag);
+
+  const title = document.createElement("h2");
+  title.className = "q-title";
+  title.textContent = q.label;
+  wrap.appendChild(title);
+
+  const hint = document.createElement("p");
+  hint.className = "q-hint";
+  hint.textContent = q.type === "checkbox" ? "当てはまるものをすべて選べます" :
+                     q.type === "text" ? "任意です。書きたいことだけで大丈夫です" :
+                     "ひとつ選んでください";
+  wrap.appendChild(hint);
+
+  if (q.type === "text"){
+    const ta = document.createElement("textarea");
+    ta.placeholder = "自由にご記入ください";
+    ta.value = state.sel[q.id] || "";
+    ta.addEventListener("input", () => { state.sel[q.id] = ta.value; });
+    wrap.appendChild(ta);
   } else {
-    answers[qId].splice(idx, 1);
-    el.classList.remove("selected");
-    el.querySelector("input[type='checkbox']").checked = false;
+    const list = document.createElement("div");
+    list.className = "opts";
+    q.options.forEach(opt => {
+      const row = document.createElement("div");
+      row.className = "opt";
+      row.dataset.opt = opt;
+      row.setAttribute("role", q.type === "checkbox" ? "checkbox" : "radio");
+
+      const ind = document.createElement("span");
+      ind.className = "ind" + (q.type === "checkbox" ? " sq" : "");
+      row.appendChild(ind);
+
+      if (opt === OTHER){
+        const lab = document.createElement("span");
+        lab.className = "other-label";
+        lab.textContent = "その他：";
+        row.appendChild(lab);
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.placeholder = "自由記入";
+        input.value = state.other[q.id] || "";
+        input.addEventListener("click", e => e.stopPropagation());
+        input.addEventListener("input", () => {
+          state.other[q.id] = input.value;
+          if (!isSelected(q, OTHER)) choose(q, OTHER, true);
+        });
+        row.appendChild(input);
+      } else {
+        const t = document.createElement("span");
+        t.className = "opt-text";
+        t.textContent = opt;
+        row.appendChild(t);
+      }
+
+      row.addEventListener("click", () => choose(q, opt, false));
+      list.appendChild(row);
+    });
+    wrap.appendChild(list);
   }
+
+  const area = $("q-area");
+  area.innerHTML = "";
+  area.appendChild(wrap);
+  refreshOptions();
+  window.scrollTo(0,0);
 }
 
-function prevStep() {
-  if (currentStep > 0) {
-    currentStep--;
-    renderQuestion();
-  }
-}
-  
-function nextStep() {
-  const q = questions[currentStep];
-  if (q.type === "textarea") {
-    const ta = document.getElementById("textarea-input");
-    answers[q.id] = ta ? ta.value : "";
-  }
-  if (answers[q.id] === "その他" && otherTexts[q.id]) {
-    answers[q.id] = `その他：${otherTexts[q.id]}`;
-  }
-  if (Array.isArray(answers[q.id])) {
-    answers[q.id] = answers[q.id].map(a => a === "その他" && otherTexts[q.id] ? `その他：${otherTexts[q.id]}` : a);
-  }
-  if (q.required && (!answers[q.id] || (Array.isArray(answers[q.id]) && answers[q.id].length === 0))) {
-    document.getElementById("error-msg").textContent = "※ 回答を選択してください";
-    return;
-  }
-  if (currentStep < questions.length - 1) {
-    currentStep++;
-    renderQuestion();
+function choose(q, opt, fromInput){
+  clearTimeout(advanceTimer);
+  $("err").textContent = "";
+  if (q.type === "checkbox"){
+    const arr = state.sel[q.id] || [];
+    const i = arr.indexOf(opt);
+    if (i === -1) arr.push(opt);
+    else if (!fromInput) arr.splice(i, 1);
+    state.sel[q.id] = arr;
   } else {
-    submitForm();
+    state.sel[q.id] = opt;
+  }
+  refreshOptions();
+
+  // 1つ選ぶ質問は、選ぶと少し間をおいて次へ進む（「その他」と最後の質問は除く）
+  if (q.type === "radio" && opt !== OTHER && !fromInput && state.idx < QUESTIONS.length - 1){
+    advanceTimer = setTimeout(() => go(1), 320);
   }
 }
 
-async function submitForm() {
-  document.getElementById("next-btn").disabled = true;
-  document.getElementById("next-btn").textContent = "送信中...";
+function hasAnswer(q){
+  const v = state.sel[q.id];
+  if (q.type === "checkbox") return Array.isArray(v) && v.length > 0;
+  return !!v && String(v).trim() !== "";
+}
+
+function go(delta){
+  clearTimeout(advanceTimer);
+  if (state.busy) return;
+  const q = QUESTIONS[state.idx];
+
+  if (delta > 0){
+    if (q.required && !hasAnswer(q)){
+      $("err").textContent = "回答を選んでください";
+      return;
+    }
+    if (state.idx === QUESTIONS.length - 1){ submit(); return; }
+    state.idx++;
+    renderQuestion("next");
+  } else {
+    if (state.idx === 0){ showScreen("screen-start"); return; }
+    state.idx--;
+    renderQuestion("back");
+  }
+}
+
+function withOther(q, v){
+  if (v === OTHER){
+    const t = (state.other[q.id] || "").trim();
+    return t ? "その他：" + t : OTHER;
+  }
+  return v;
+}
+
+function buildAnswers(){
+  const out = {};
+  QUESTIONS.forEach(q => {
+    const v = state.sel[q.id];
+    if (q.type === "checkbox"){
+      out[q.id] = (Array.isArray(v) ? v : []).map(x => withOther(q, x));
+    } else if (q.type === "text"){
+      out[q.id] = v || "";
+    } else {
+      out[q.id] = v ? withOther(q, v) : "";
+    }
+  });
+  return out;
+}
+
+async function submit(){
+  state.busy = true;
+  const btn = $("next-btn");
+  btn.disabled = true;
+  btn.textContent = "送信中…";
   try {
     await fetch(GAS_URL, {
       method: "POST",
       mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, answers })
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({ userId: userId, answers: buildAnswers() })
     });
-  } catch(err) {
+    showScreen("screen-done");
+  } catch (err){
     console.error("送信エラー:", err);
+    $("err").textContent = "送信できませんでした。通信環境をご確認のうえ、もう一度お試しください。";
+    btn.disabled = false;
+    btn.textContent = "送信する";
   }
-  document.getElementById("form-area").style.display = "none";
-  document.getElementById("thank-you-area").style.display = "block";
+  state.busy = false;
 }
 
 try {
-  renderQuestion();
-} catch(err) {
-  document.getElementById("form-area").style.display = "none";
-  document.getElementById("loading-area").style.display = "block";
+  $("start-btn").addEventListener("click", () => {
+    state.idx = 0;
+    showScreen("screen-q");
+    renderQuestion("next");
+  });
+  $("next-btn").addEventListener("click", () => go(1));
+  $("back-btn").addEventListener("click", () => go(-1));
+} catch (err){
+  document.querySelectorAll(".screen").forEach(s => s.style.display = "none");
+  $("fallback").style.display = "block";
 }
 </script>
 </body>
