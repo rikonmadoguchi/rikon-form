@@ -380,9 +380,7 @@ function choose(q, opt, fromInput){
   refreshOptions();
 
   // 1つ選ぶ質問は、選ぶと少し間をおいて次へ進む（「その他」と最後の質問は除く）
-  if (q.type === "radio" && opt !== OTHER && !fromInput && state.idx < QUESTIONS.length - 1){
-    advanceTimer = setTimeout(() => go(1), 320);
-  }
+  // 自動で次へは進まない（「次へ」ボタンで進む）
 }
 
 function hasAnswer(q){
